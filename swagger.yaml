@@ -1,0 +1,285 @@
+swagger: '2.0'
+info:
+  description: Respect! (Respect Small Money) API documentation and schemes.
+  version: 1.0.0
+  title: RSM API Documentation
+  # put the contact info for your development or API team
+  contact:
+    email: developer@rsmmoney.com
+    name: Developer
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# tags are used for organizing operations
+tags:
+- name: Product
+  description: ''
+
+paths:
+  /RSM/API/Product:
+    post:
+      summary: "Request to creates new product with default state = 'draft'"
+      tags:
+      - Product
+      description: "At this point, product is not visible to the users."
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: ''
+        schema:
+          $ref: '#/definitions/FinancialProduct'
+      responses:
+        200:
+          description: 'Request successfully processed.'
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: '1'
+                description: "id of created product. it can be used to send updates, receive product information, change product's status"
+        400:
+          description: "Bad input parameter"
+        401:
+          description: "Authorization required."
+        403:
+          description: "Exceeded allowed number of products. Possible solutions are to delete some unwanted products, change product's state OR contact developer@rsmmoney.com"
+    get:
+      summary: "Request list of products"
+      tags:
+      - Product
+      description: ""
+      produces:
+      - applicaiton/json
+      responses:
+        200:
+          description: 'Request successfully processed.'
+          schema:
+            type: array
+            items:
+              allOf:
+              - $ref: '#/definitions/FinancialProduct'
+              type: object
+              properties:
+                state:
+                  $ref: '#/definitions/ProductState'
+                update_date:
+                  type: string
+                  example: "2000-00-01 00:00:21"
+                  description: "last time product was updated."
+                id:
+                  type: integer
+                  example: 1
+                  description: "product's unique id"
+        401:
+          description: "Authorization required."
+          
+  /RSM/API/Product/{id}:
+    get:
+      summary: "Request product details"
+      parameters:
+      - in: path
+        name: id
+        type: integer
+        required: true
+        description: "product's unique id"
+      tags:
+      - Product
+      description: ""
+      produces:
+      - applicaiton/json
+      responses:
+        200:
+          description: 'Request successfully processed.'
+          schema:
+            allOf:
+              - $ref: '#/definitions/FinancialProduct'
+              - type: object
+                properties:
+                  state:
+                      $ref: '#/definitions/ProductState'
+                  update_date:
+                    type: string
+                    example: "2000-00-01 00:00:21"
+                    description: "last time product was updated."
+        400:
+          description: "Bad input parameter"
+        401:
+          description: "Authorization required."
+    put:
+      summary: "Request to update product's details"
+      parameters:
+      - in: path
+        name: id
+        type: integer
+        required: true
+        description: "product's unique id"
+      - in: body
+        name: ''
+        schema:
+          $ref: '#/definitions/FinancialProduct'
+      tags:
+      - Product
+      description: ""
+      produces:
+      - applicaiton/json
+      responses:
+        200:
+          description: 'Request successfully processed.'
+        400:
+          description: "Bad input parameter"
+        401:
+          description: "Authorization required."
+        409:
+          description: "Data is up-to-date or incorrect id was used."
+    delete:
+      summary: "Request to delete product"
+      parameters:
+      - in: path
+        name: id
+        type: integer
+        required: true
+        description: "product's unique id"
+      tags:
+      - Product
+      description: ""
+      produces:
+      - applicaiton/json
+      responses:
+        200:
+          description: 'Request successfully processed.'
+        400:
+          description: "Bad input parameter"
+        401:
+          description: "Authorization required."
+        403:
+          description: "Some users reported subscription to this product. It is impossible to delete it right now. Despite that, companies are advised to continue sending product updates. If the company no longer wants this product to be searchable, it is required to change its state to subscribed and continue sending updates."
+          
+  /RSM/API/Product/state/{id}/{new_state}:
+    put:
+      summary: "Request to change product's state"
+      parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+        description: "product's unique id"
+      - name: new_state
+        in: path
+        type: string
+        required: true
+        description: "for more details see ProductState model"
+      tags:
+      - Product
+      description: ""
+      produces:
+      - applicaiton/json
+      responses:
+        200:
+          description: 'Request successfully processed.'
+        400:
+          description: "Bad input parameter"
+        401:
+          description: "Authorization required."
+        404:
+          description: "Not found"
+
+          
+definitions:
+  FinancialProduct:
+    type: object
+    required:
+    - type
+    properties:
+      investment_product:
+        type: string
+        example: 'KB내맘대로적금'
+        description: 'name of investment product as specified by financial institution. 투자상품명'
+      investment_period_min:
+        type: integer
+        example: '6'
+        description: 'minimum investment period. for example, user can invest at least for 6 months, not smaller than that. 투자기간(최저-월)'
+      investment_period_max:
+        type: integer
+        example: '36'
+        description: 'maximum investment period. for example, user can invest maximum for 36 month, not more than that. 펀드가 개방형 펀드이면, 그냥 공란으로 두고, 만기가 있으면 직접입력함'
+      annual_expected_return:
+        type: number
+        example: '2.62'
+        description: 'annual expected return in %. For example, when principal amount of investment will be guaranteed to be returned to depositor'
+      credit_ratings:
+        type: string
+        example: 'AAA'
+        description: 'overall S&P credit ratings of the company'
+      aum:
+        type: number
+        example: '3000'
+        description: 'asset under management of the company. 해당상품운용규모(억원)'
+      last_3_years:
+        type: number
+        example: '2.18'
+        description: 'recent X months return rate of the product. 최근 X 개월 수익률 (%)'
+      performance_period:
+        type: integer
+        example: '12'
+        description: 'used together with last_3_years to specify X months for which return rate was specified. For example, 2.18% for recent 6 or 12 months. X 개월'
+      period:
+        type: integer
+        example: '12'
+        description: 'actual total operation period of this product since establishment in months. 실제상품운용기간 (월)'
+      bnfc_rat_aft_estb:
+        type: number
+        example: '12.65'
+        description: 'cumulative return rate since product establishment in %'
+      tot_comm_rat:
+        type: number
+        example: '0.1'
+        description: 'the total amount for commission/remuneration for product management (yearly,%).'
+      caution_stmnt:
+        type: string
+        example: '이 금융투자상품은 예금자보호법에 따라 예금보험공사가 보호하지 않습니다'
+        description: 'cautionary statements or disclaimers for users of potential investment risks. 펀드 유형 별로 유의문구 적용 (최대 500 자)'
+      minimum_amount:
+        type: integer
+        example: '10000'
+        description: 'minimum amount of money (KRW) client might invest to this product. 최소가입금액(원)'
+      principal_guarantee:
+        type: string
+        example: 'Y'
+        description: 'is principal amount of money invested by client guaranteed to be returned back to client? (Y/N). 원금보장유무'
+      deposit_guarantee:
+        type: string
+        example: 'Y'
+        description: 'is depositor protection applies? 예금자보호유무'
+      tax_benefit:
+        type: string
+        example: 'Y'
+        description: 'is there tax benefits for this product (Y/N). 세금혜택유무'
+      maximum_losses:
+        type: number
+        example: '30.44'
+        description: 'maximum possible loss rate in %'
+      url:
+        type: string
+        example: 'http://www.naver.com'
+        description: 'url to marketing website, or phone number to marketing person in charge'
+      state:
+        $ref: '#/definitions/ProductState'
+        
+    
+  ProductState:
+    type: string
+    enum: ['draft', 'searchable', 'subscribed']
+    example: 'draft'
+    description: >
+      * `searchable` -  product that will become visible to users in search results.
+      * `subscribed` -  product will not become visible in search results. product only visible to users who subscribed to that product. companies should send daily updates to this product anyways since subscribed users need to know about product updates.
+      * `draft` -  default product's state upon creation. product will not be visible to any user. this state is the safest for companies to create products initially. once the company is satisfied with product details and there is no error, it's advisable to change the product state to searchable. 
+      
+      
+      
+      
+      
