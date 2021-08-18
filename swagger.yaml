@@ -12,21 +12,75 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 
+schemes: [https]
+host: "admin.rsmmoney.com"
 # tags are used for organizing operations
 tags:
+- name: AdminAuth
 - name: Product
   description: ''
+produces:
+  - application/json
+consumes:
+  - application/json
 
 paths:
+  /RSM/API/AdminAuth/login:
+    post:
+      summary: "Request for access token that is used to authorize APIs"
+      tags:
+      - AdminAuth
+      description: "access_token is valid for 60 minutes. after expiration it's required to request login API again to obtain new access_token. There is a limit of 5 incorrect login attempts. After total of 5 incorrect login attempts the account will be blocked."
+      parameters:
+      - in: body
+        name: ''
+        schema:
+          type: object
+          properties:
+            user_id:
+              type: string
+              example: ""
+              description: ""
+            user_password:
+              type: string
+              example: ""
+              description: ""
+      responses:
+        200:
+          description: 'Request successfully processed.'
+          schema:
+            type: object
+            properties:
+              tokens:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: ""
+                    description: ""
+                  user_id:
+                    type: string
+                    example: ""
+                    description: ""
+                  incorrect_attempts:
+                    type: string
+                    example: "0"
+                    description: ""
+        400:
+          description: "Bad input parameter"
+          
   /RSM/API/Product:
     post:
       summary: "Request to creates new product with default state = 'draft'"
       tags:
       - Product
       description: "At this point, product is not visible to the users."
-      produces:
-      - application/json
       parameters:
+      - in: header
+        type: string
+        name: 'Authorization'
+        description: "It's required to use access_token"
+        required: true
       - in: body
         name: ''
         schema:
@@ -52,8 +106,12 @@ paths:
       tags:
       - Product
       description: ""
-      produces:
-      - applicaiton/json
+      parameters:
+        - in: header
+          type: string
+          name: 'Authorization'
+          description: "It's required to use access_token"
+          required: true
       responses:
         200:
           description: 'Request successfully processed.'
@@ -81,6 +139,11 @@ paths:
     get:
       summary: "Request product details"
       parameters:
+      - in: header
+        type: string
+        name: 'Authorization'
+        description: "It's required to use access_token"
+        required: true
       - in: path
         name: id
         type: integer
@@ -89,8 +152,6 @@ paths:
       tags:
       - Product
       description: ""
-      produces:
-      - applicaiton/json
       responses:
         200:
           description: 'Request successfully processed.'
@@ -112,6 +173,11 @@ paths:
     put:
       summary: "Request to update product's details"
       parameters:
+      - in: header
+        type: string
+        name: 'Authorization'
+        description: "It's required to use access_token"
+        required: true
       - in: path
         name: id
         type: integer
@@ -124,8 +190,6 @@ paths:
       tags:
       - Product
       description: ""
-      produces:
-      - applicaiton/json
       responses:
         200:
           description: 'Request successfully processed.'
@@ -138,6 +202,11 @@ paths:
     delete:
       summary: "Request to delete product"
       parameters:
+      - in: header
+        type: string
+        name: 'Authorization'
+        description: "It's required to use access_token"
+        required: true
       - in: path
         name: id
         type: integer
@@ -146,8 +215,6 @@ paths:
       tags:
       - Product
       description: ""
-      produces:
-      - applicaiton/json
       responses:
         200:
           description: 'Request successfully processed.'
@@ -162,6 +229,11 @@ paths:
     put:
       summary: "Request to change product's state"
       parameters:
+      - in: header
+        type: string
+        name: 'Authorization'
+        description: "It's required to use access_token"
+        required: true
       - name: id
         in: path
         type: integer
@@ -175,8 +247,6 @@ paths:
       tags:
       - Product
       description: ""
-      produces:
-      - applicaiton/json
       responses:
         200:
           description: 'Request successfully processed.'
@@ -197,7 +267,7 @@ definitions:
       investment_product:
         type: string
         example: 'KB내맘대로적금'
-        description: 'name of investment product as specified by financial institution. 투자상품명'
+        description: 'name of investment product as specified by financial institution. always should be same as actual product name selling by financial company. 투자상품명'
       investment_period_min:
         type: integer
         example: '6'
@@ -208,20 +278,23 @@ definitions:
         description: 'maximum investment period. for example, user can invest maximum for 36 month, not more than that. 펀드가 개방형 펀드이면, 그냥 공란으로 두고, 만기가 있으면 직접입력함'
       annual_expected_return:
         type: number
+        format: double
         example: '2.62'
-        description: 'annual expected return in %. For example, when principal amount of investment will be guaranteed to be returned to depositor'
+        description: '100% guaranteed annual expected return rate in %. For example, when the principal amount of investment will be guaranteed to be returned to the depositor plus yearly rate, similarly as you would invest in the bank with a constant return rate.'
       credit_ratings:
         type: string
         example: 'AAA'
-        description: 'overall S&P credit ratings of the company'
+        description: "overall Standard & Poor's credit ratings of the company, up until C grade. (https://en.wikipedia.org/wiki/S%26P_Global_Ratings)"
       aum:
         type: number
+        format: double
         example: '3000'
-        description: 'asset under management of the company. 해당상품운용규모(억원)'
+        description: 'asset under management of the company(in 100 million won). 해당상품운용규모(억원)'
       last_3_years:
         type: number
+        format: double
         example: '2.18'
-        description: 'recent X months return rate of the product. 최근 X 개월 수익률 (%)'
+        description: 'recent X months return rate of the product. X months comes from performance_period. 최근 X 개월 수익률 (%)'
       performance_period:
         type: integer
         example: '12'
@@ -232,12 +305,14 @@ definitions:
         description: 'actual total operation period of this product since establishment in months. 실제상품운용기간 (월)'
       bnfc_rat_aft_estb:
         type: number
+        format: double
         example: '12.65'
-        description: 'cumulative return rate since product establishment in %'
+        description: 'cumulative return rate since product establishment in %. 설정 이후 수익률'
       tot_comm_rat:
         type: number
+        format: double
         example: '0.1'
-        description: 'the total amount for commission/remuneration for product management (yearly,%).'
+        description: 'the total amount for commission/remuneration for product management (yearly,%). 연 총 펀드보수(연,%)'
       caution_stmnt:
         type: string
         example: '이 금융투자상품은 예금자보호법에 따라 예금보험공사가 보호하지 않습니다'
@@ -245,27 +320,28 @@ definitions:
       minimum_amount:
         type: integer
         example: '10000'
-        description: 'minimum amount of money (KRW) client might invest to this product. 최소가입금액(원)'
+        description: 'minimum amount of money (KRW) client might invest to the product. 최소가입금액(원)'
       principal_guarantee:
         type: string
         example: 'Y'
-        description: 'is principal amount of money invested by client guaranteed to be returned back to client? (Y/N). 원금보장유무'
+        description: 'is principal amount of money that will be invested by client guaranteed to be returned back to the client by the end of subscription period? (Y/N). 원금보장유무'
       deposit_guarantee:
         type: string
         example: 'Y'
-        description: 'is depositor protection applies? 예금자보호유무'
+        description: 'is depositor protection applies? The KDIC provides protection for deposits of up to KRW 50 million per depositor per institution. 예금자보호유무'
       tax_benefit:
         type: string
         example: 'Y'
         description: 'is there tax benefits for this product (Y/N). 세금혜택유무'
       maximum_losses:
         type: number
+        format: double
         example: '30.44'
         description: 'maximum possible loss rate in %'
       url:
         type: string
         example: 'http://www.naver.com'
-        description: 'url to marketing website, or phone number to marketing person in charge'
+        description: 'url to marketing website adapted for mobile views, or phone number to the marketing person in charge. 모바일보기에 맞게 조정 된 상품세부 정보에 대한 URL'
       state:
         $ref: '#/definitions/ProductState'
         
@@ -277,9 +353,4 @@ definitions:
     description: >
       * `searchable` -  product that will become visible to users in search results.
       * `subscribed` -  product will not become visible in search results. product only visible to users who subscribed to that product. companies should send daily updates to this product anyways since subscribed users need to know about product updates.
-      * `draft` -  default product's state upon creation. product will not be visible to any user. this state is the safest for companies to create products initially. once the company is satisfied with product details and there is no error, it's advisable to change the product state to searchable. 
-      
-      
-      
-      
-      
+      * `draft` -  default product's state upon creation. product will not be visible to any user. this state is the safest for companies to create products initially. once the company is satisfied with product details and there is no error, it's advisable to change the product state to searchable.
