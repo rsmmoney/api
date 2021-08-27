@@ -1,0 +1,357 @@
+swagger: '2.0'
+info:
+  description: Respect! (Respect Small Money) API documentation and schemes.
+  version: 1.0.0
+  title: RSM API Documentation
+  # put the contact info for your development or API team
+  contact:
+    email: developer@rsmmoney.com
+    name: Developer
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+schemes: [https]
+host: "admin.rsmmoney.com"
+# tags are used for organizing operations
+tags:
+- name: AdminAuth
+- name: Product
+  description: ''
+produces:
+  - application/json
+consumes:
+  - application/json
+
+paths:
+  /RSM/API/AdminAuth/login:
+    post:
+      summary: "API 인증에 사용되는 액세스 토큰 요청"
+      tags:
+      - AdminAuth
+      description: "access_token은 60분 동안 유효합니다. 만료 후 새로운 access_token을 얻으려면 로그인 API를 다시 요청해야 합니다. 잘못된 로그인 시도 횟수는 5회로 제한됩니다. 총 5번의 잘못된 로그인 시도 후에 계정이 차단됩니다."
+      parameters:
+      - in: body
+        name: ''
+        schema:
+          type: object
+          properties:
+            user_id:
+              type: string
+              example: ""
+              description: ""
+            user_password:
+              type: string
+              example: ""
+              description: ""
+      responses:
+        200:
+          description: '요청이 성공적으로 처리되었습니다.'
+          schema:
+            type: object
+            properties:
+              tokens:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: ""
+                    description: ""
+                  user_id:
+                    type: string
+                    example: ""
+                    description: ""
+                  incorrect_attempts:
+                    type: string
+                    example: "0"
+                    description: ""
+        400:
+          description: "잘못된 입력 매개변수"
+          
+  /RSM/API/Product:
+    post:
+      summary: "기본 상태 '초안'으로 새 제품 생성 요청 state = 'draft'"
+      tags:
+      - Product
+      description: "이 시점에서 제품은 '초안' 상태이므로 사용자에게 보이지 않습니다."
+      parameters:
+      - in: header
+        type: string
+        name: 'Authorization'
+        description: "access_token을 사용해야 합니다."
+        required: true
+      - in: body
+        name: ''
+        schema:
+          $ref: '#/definitions/FinancialProduct'
+      responses:
+        200:
+          description: '요청이 성공적으로 처리되었습니다.'
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: '1'
+                description: "생성된 제품의 ID입니다. 업데이트 전송, 제품 정보 수신, 제품 상태 변경에 사용할 수 있습니다."
+        400:
+          description: "잘못된 입력 매개변수"
+        401:
+          description: "승인이 필요합니다."
+        403:
+          description: "허용된 제품 수를 초과했습니다. 가능한 해결책은 원치 않는 제품을 삭제하거나 제품 상태를 변경하거나 developer@rsmmoney.com에 문의하는 것입니다."
+    get:
+      summary: "제품 목록 요청"
+      tags:
+      - Product
+      description: ""
+      parameters:
+        - in: header
+          type: string
+          name: 'Authorization'
+          description: "access_token을 사용해야 합니다."
+          required: true
+      responses:
+        200:
+          description: '요청이 성공적으로 처리되었습니다.'
+          schema:
+            type: array
+            items:
+              allOf:
+              - $ref: '#/definitions/FinancialProduct'
+              type: object
+              properties:
+                state:
+                  $ref: '#/definitions/ProductState'
+                update_date:
+                  type: string
+                  example: "2000-00-01 00:00:21"
+                  description: "마지막으로 제품이 업데이트되었습니다."
+                id:
+                  type: integer
+                  example: 1
+                  description: "제품의 고유 ID"
+        401:
+          description: "승인이 필요합니다."
+          
+  /RSM/API/Product/{id}:
+    get:
+      summary: "제품 세부정보 요청"
+      parameters:
+      - in: header
+        type: string
+        name: 'Authorization'
+        description: "access_token을 사용해야 합니다."
+        required: true
+      - in: path
+        name: id
+        type: integer
+        required: true
+        description: "제품의 고유 ID"
+      tags:
+      - Product
+      description: ""
+      responses:
+        200:
+          description: '요청이 성공적으로 처리되었습니다.'
+          schema:
+            allOf:
+              - $ref: '#/definitions/FinancialProduct'
+              - type: object
+                properties:
+                  state:
+                      $ref: '#/definitions/ProductState'
+                  update_date:
+                    type: string
+                    example: "2000-00-01 00:00:21"
+                    description: "마지막으로 제품이 업데이트되었습니다."
+        400:
+          description: "잘못된 입력 매개변수"
+        401:
+          description: "승인이 필요합니다."
+    put:
+      summary: "제품 세부 정보 업데이트 요청"
+      parameters:
+      - in: header
+        type: string
+        name: 'Authorization'
+        description: "access_token을 사용해야 합니다."
+        required: true
+      - in: path
+        name: id
+        type: integer
+        required: true
+        description: "제품의 고유 ID"
+      - in: body
+        name: ''
+        schema:
+          $ref: '#/definitions/FinancialProduct'
+      tags:
+      - Product
+      description: ""
+      responses:
+        200:
+          description: '요청이 성공적으로 처리되었습니다.'
+        400:
+          description: "잘못된 입력 매개변수"
+        401:
+          description: "승인이 필요합니다."
+        409:
+          description: "데이터가 최신 상태이거나 잘못된 ID가 사용되었습니다."
+    delete:
+      summary: "제품 삭제 요청"
+      parameters:
+      - in: header
+        type: string
+        name: 'Authorization'
+        description: "access_token을 사용해야 합니다."
+        required: true
+      - in: path
+        name: id
+        type: integer
+        required: true
+        description: "제품의 고유 ID"
+      tags:
+      - Product
+      description: ""
+      responses:
+        200:
+          description: '요청이 성공적으로 처리되었습니다.'
+        400:
+          description: "잘못된 입력 매개변수"
+        401:
+          description: "승인이 필요합니다."
+        403:
+          description: "일부 사용자가 이 제품에 대한 구독을 보고했습니다. 지금은 삭제가 불가능합니다. 그럼에도 불구하고 회사는 제품 업데이트를 계속 보내는 것이 좋습니다. 회사에서 더 이상 이 제품을 검색할 수 없도록 하려면 상태를 구독됨으로 변경하고 업데이트를 계속 보내야 합니다."
+          
+  /RSM/API/Product/state/{id}/{new_state}:
+    put:
+      summary: "제품 상태 변경 요청"
+      parameters:
+      - in: header
+        type: string
+        name: 'Authorization'
+        description: "access_token을 사용해야 합니다."
+        required: true
+      - name: id
+        in: path
+        type: integer
+        required: true
+        description: "제품의 고유 ID"
+      - name: new_state
+        in: path
+        type: string
+        required: true
+        description: "자세한 내용은 ProductState 모델을 참조하십시오."
+      tags:
+      - Product
+      description: ""
+      responses:
+        200:
+          description: '요청이 성공적으로 처리되었습니다.'
+        400:
+          description: "잘못된 입력 매개변수"
+        401:
+          description: "승인이 필요합니다."
+        404:
+          description: "찾을 수 없음"
+
+          
+definitions:
+  FinancialProduct:
+    type: object
+    required:
+    - type
+    properties:
+      investment_product:
+        type: string
+        example: 'KB내맘대로적금'
+        description: '금융기관이 지정한 투자상품명. 항상 금융회사에서 판매하는 실제 상품명과 동일해야 합니다. 투자상품명'
+      investment_period_min:
+        type: integer
+        example: '6'
+        description: '최소 투자 기간. 예를 들어 사용자는 최소 6개월 이상 투자할 수 있습니다. 투자기간(최저-월)'
+      investment_period_max:
+        type: integer
+        example: '36'
+        description: '최대 투자 기간. 예를 들어, 사용자는 최대 36개월 동안 투자할 수 있으며 그 이상은 할 수 없습니다. 펀드가 개방형 펀드이면, 그냥 공란으로 두고, 만기가 있으면 직접입력함'
+      annual_expected_return:
+        type: number
+        format: double
+        example: '2.62'
+        description: '100% 보장된 연간 예상 수익률(%). 예를 들어, 일정한 수익률로 은행에 투자하는 것과 마찬가지로 투자 원금이 예금자에게 반환되는 것이 보장되는 경우.'
+      credit_ratings:
+        type: string
+        example: 'AAA'
+        description: "Standard & Poor's 회사의 전반적인 신용 등급, C 등급까지. (https://en.wikipedia.org/wiki/S%26P_Global_Ratings)"
+      aum:
+        type: number
+        format: double
+        example: '3000'
+        description: '회사가 관리하는 자산(1억원). 해당상품운용규모(억원)'
+      last_3_years:
+        type: number
+        format: double
+        example: '2.18'
+        description: '제품의 최근 X개월 반품률입니다. X개월은 performance_period에서 나옵니다. 최근 X 개월 수익률 (%)'
+      performance_period:
+        type: integer
+        example: '12'
+        description: 'last_3_years와 함께 사용하여 반환율이 지정된 X개월을 지정합니다. 예를 들어 최근 6개월 또는 12개월 동안 2.18%입니다. X 개월'
+      period:
+        type: integer
+        example: '12'
+        description: '실제상품운용기간 (월)'
+      bnfc_rat_aft_estb:
+        type: number
+        format: double
+        example: '12.65'
+        description: '설정 이후 수익률 (%)'
+      tot_comm_rat:
+        type: number
+        format: double
+        example: '0.1'
+        description: '연 총 펀드보수(연,%)'
+      caution_stmnt:
+        type: string
+        example: '이 금융투자상품은 예금자보호법에 따라 예금보험공사가 보호하지 않습니다'
+        description: '펀드 유형 별로 유의문구 적용 (최대 500 자)'
+      minimum_amount:
+        type: integer
+        example: '10000'
+        description: '상품에 투자하기 위해 필요한 최소금액(원) 고객입니다. 최소가입금액(원)'
+      principal_guarantee:
+        type: string
+        example: 'Y'
+        description: '고객이 투자할 원금이 청약 기간 종료 시 고객에게 반환되는 것이 보장됩니까? (Y/N). 원금보장유무'
+      deposit_guarantee:
+        type: string
+        example: 'Y'
+        description: '예금자 보호가 적용됩니까? KDIC는 기관별 예금자 1인당 최대 5천만 원의 예금을 보호합니다. 예금자보호유무 (Y/N)'
+      tax_benefit:
+        type: string
+        example: 'Y'
+        description: '세금혜택유무'
+      maximum_losses:
+        type: number
+        format: double
+        example: '30.44'
+        description: '최대 가능한 손실률(%)'
+      url:
+        type: string
+        example: 'http://www.naver.com'
+        description: '모바일보기에 맞게 조정 된 상품세부 정보에 대한 URL'
+      state:
+        $ref: '#/definitions/ProductState'
+        
+    
+  ProductState:
+    type: string
+    enum: ['draft', 'searchable', 'subscribed']
+    example: 'draft'
+    description: >
+      * `searchable` -  검색 결과에서 사용자에게 표시될 제품.
+      * `subscribed` -  제품은 검색 결과에 표시되지 않습니다. 해당 제품을 구독했다고 주장한 사용자에게만 표시되는 제품입니다. 가입한 사용자는 제품 업데이트에 대해 알아야 하므로 회사는 어쨌든 이 제품에 대한 매일 업데이트를 보내야 합니다.
+      * `draft` -  생성 시 기본 제품 상태입니다. 어떤 사용자에게도 제품이 표시되지 않습니다. 이 상태는 회사가 처음에 제품을 만드는 데 가장 안전한 상태입니다. 회사가 상품 상세 내용에 만족하고 오류가 없으면 상품 상태를 검색 가능으로 변경하는 것이 좋습니다.
+      상태 전환 다이어그램은 https://docs.rsmmoney.com/product-state-transition-diagram.png 링크에서 사용할 수 있습니다.
