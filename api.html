@@ -9,9 +9,12 @@
         <div id="swagger-ui"></div> <!-- Div to hold the UI component -->
         <script>
             window.onload = function () {
+                var urlString = window.location.href;
+                var url = new URL(urlString);
+                var path = url.searchParams.get("path");
                 // Begin Swagger UI call region
                 const ui = SwaggerUIBundle({
-                    url: "/swagger.yaml", //Location of Open API spec in the repo
+                    url: "/"+ path + ".yaml", //Location of Open API spec in the repo
                     dom_id: '#swagger-ui',
                     deepLinking: true,
                     presets: [
