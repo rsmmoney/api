@@ -331,7 +331,7 @@ definitions:
       deposit_guarantee:
         type: string
         example: 'Y'
-        description: '예금자 보호가 적용됩니까? KDIC는 기관별 예금자 1인당 최대 5천만 원의 예금을 보호합니다. 예금자보호유무 (Y/N)'
+        description: '예금자 보호가 적용됩니까? 예금보험공사는 기관별 예금자 1인당 최대 5천만 원의 예금을 보호합니다. 예금자보호유무 (Y/N)'
       tax_benefit:
         type: string
         example: 'Y'
