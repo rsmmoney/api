@@ -68,6 +68,8 @@ paths:
                     description: ""
         400:
           description: "잘못된 입력 매개변수"
+        429:
+          description: "요청이 너무 많습니다. 속도 제한 솔루션이 적용되었습니다."
           
   /RSM/API/Product:
     post:
