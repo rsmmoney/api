@@ -69,6 +69,8 @@ paths:
                     description: ""
         400:
           description: "Bad input parameter"
+        429:
+          description: "Too many requests. Rate limiting solution has applied."
           
   /RSM/API/Product:
     post:
