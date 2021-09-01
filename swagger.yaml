@@ -14,6 +14,7 @@ info:
 
 schemes: [https]
 host: "admin.rsmmoney.com"
+
 # tags are used for organizing operations
 tags:
 - name: AdminAuth
@@ -268,6 +269,10 @@ definitions:
         type: string
         example: 'KB내맘대로적금'
         description: 'name of investment product as specified by financial institution. always should be same as actual product name selling by financial company. 투자상품명'
+      investment_company:
+        type: string
+        example: 'KB내맘대로적금'
+        description: 'asset management company'
       investment_period_min:
         type: integer
         example: '6'
@@ -355,6 +360,3 @@ definitions:
       * `subscribed` -  product will not become visible in search results. product only visible to users who subscribed to that product. companies should send daily updates to this product anyways since subscribed users need to know about product updates.
       * `draft` -  default product's state upon creation. product will not be visible to any user. this state is the safest for companies to create products initially. once the company is satisfied with product details and there is no error, it's advisable to change the product state to searchable.
       State transition diagram is available at the link https://docs.rsmmoney.com/product-state-transition-diagram.png
-      
-
-
