@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  description: Respect! (Respect Small Money) API documentation and schemes.
+  description: Respect! (Respect Small Money) API documentation.
   version: 1.0.0
   title: RSM API Documentation
   # put the contact info for your development or API team
@@ -14,6 +14,7 @@ info:
 
 schemes: [https]
 host: "admin.rsmmoney.com"
+basePath: "/RSMStage/API"
 
 # tags are used for organizing operations
 tags:
@@ -26,7 +27,7 @@ consumes:
   - application/json
 
 paths:
-  /RSM/API/AdminAuth/login:
+  /AdminAuth/login:
     post:
       summary: "Request for access token that is used to authorize APIs"
       tags:
@@ -34,7 +35,8 @@ paths:
       description: "access_token is valid for 60 minutes. after expiration it's required to request login API again to obtain new access_token. There is a limit of 5 incorrect login attempts. After total of 5 incorrect login attempts the account will be blocked."
       parameters:
       - in: body
-        name: ''
+        name: 'body'
+        required: true
         schema:
           type: object
           properties:
@@ -70,9 +72,9 @@ paths:
         400:
           description: "Bad input parameter"
         429:
-          description: "Too many requests. Rate limiting solution has applied."
+          description: "Too many requests. A rate-limiting solution has been applied"
           
-  /RSM/API/Product:
+  /Product:
     post:
       summary: "Request to creates new product with default state = 'draft'"
       tags:
@@ -85,7 +87,7 @@ paths:
         description: "It's required to use access_token"
         required: true
       - in: body
-        name: ''
+        name: 'body'
         schema:
           $ref: '#/definitions/FinancialProduct'
       responses:
@@ -138,7 +140,7 @@ paths:
         401:
           description: "Authorization required."
           
-  /RSM/API/Product/{id}:
+  /Product/{id}:
     get:
       summary: "Request product details"
       parameters:
@@ -187,7 +189,8 @@ paths:
         required: true
         description: "product's unique id"
       - in: body
-        name: ''
+        name: 'body'
+        required: true
         schema:
           $ref: '#/definitions/FinancialProduct'
       tags:
@@ -228,7 +231,7 @@ paths:
         403:
           description: "Some users reported subscription to this product. It is impossible to delete it right now. Despite that, companies are advised to continue sending product updates. If the company no longer wants this product to be searchable, it is required to change its state to subscribed and continue sending updates."
           
-  /RSM/API/Product/state/{id}/{new_state}:
+  /Product/state/{id}/{new_state}:
     put:
       summary: "Request to change product's state"
       parameters:
