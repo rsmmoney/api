@@ -8,10 +8,15 @@
     <body>
         <div id="swagger-ui"></div> <!-- Div to hold the UI component -->
         <script>
+            var urlString = window.location.href;
+            var url = new URL(urlString);
+            var path = url.searchParams.get("path");
+            var lang = url.searchParams.get("lang");
+            lang ??= "en";
+            loadScriptSync("lang/translator.js");
+            loadScriptSync("lang/" + lang + ".js");
+
             window.onload = function () {
-                var urlString = window.location.href;
-                var url = new URL(urlString);
-                var path = url.searchParams.get("path");
                 // Begin Swagger UI call region
                 const ui = SwaggerUIBundle({
                     url: "/"+ path + ".yaml", //Location of Open API spec in the repo
@@ -26,6 +31,14 @@
                     ],
                 })
                 window.ui = ui
+            }
+            function loadScriptSync(source) {
+                let script = document.createElement("script");
+                script.setAttribute("src", source);
+                script.setAttribute("async", false);
+
+                let head = document.head;
+                head.insertBefore(script, head.firstElementChild);
             }
         </script>
     </body>
