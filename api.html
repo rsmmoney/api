@@ -1,7 +1,7 @@
 <html>
     <head>
         <!-- Load the latest Swagger UI code and style from npm using unpkg.com -->
-        <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
+        <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js" charset="UTF-8"></script>
         <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3/swagger-ui.css"/>
         <title>API</title>
     </head>
@@ -12,10 +12,6 @@
                 var urlString = window.location.href;
                 var url = new URL(urlString);
                 var path = url.searchParams.get("path");
-                var lang = url.searchParams.get("lang");
-                lang ??= "en";
-                loadScriptSync("lang/translator.js");
-                loadScriptSync("lang/" + lang + ".js");
                 // Begin Swagger UI call region
                 const ui = SwaggerUIBundle({
                     url: "/"+ path + ".yaml", //Location of Open API spec in the repo
