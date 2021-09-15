@@ -11,6 +11,16 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
+    
+securityDefinitions:
+  Authorization:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: Requests should pass an Authorization header with access_token that can be received from /AdminAuth/login.
+
+security: 
+ - Authorization: []
 
 schemes: [https]
 host: "admin.rsmmoney.com"
@@ -81,11 +91,6 @@ paths:
       - Product
       description: "At this point, product is not visible to the users."
       parameters:
-      - in: header
-        type: string
-        name: 'Authorization'
-        description: "It's required to use access_token"
-        required: true
       - in: body
         name: 'body'
         schema:
@@ -111,12 +116,6 @@ paths:
       tags:
       - Product
       description: ""
-      parameters:
-        - in: header
-          type: string
-          name: 'Authorization'
-          description: "It's required to use access_token"
-          required: true
       responses:
         200:
           description: 'Request successfully processed.'
@@ -144,11 +143,6 @@ paths:
     get:
       summary: "Request product details"
       parameters:
-      - in: header
-        type: string
-        name: 'Authorization'
-        description: "It's required to use access_token"
-        required: true
       - in: path
         name: id
         type: integer
@@ -178,11 +172,6 @@ paths:
     put:
       summary: "Request to update product's details"
       parameters:
-      - in: header
-        type: string
-        name: 'Authorization'
-        description: "It's required to use access_token"
-        required: true
       - in: path
         name: id
         type: integer
@@ -208,11 +197,6 @@ paths:
     delete:
       summary: "Request to delete product"
       parameters:
-      - in: header
-        type: string
-        name: 'Authorization'
-        description: "It's required to use access_token"
-        required: true
       - in: path
         name: id
         type: integer
@@ -235,11 +219,6 @@ paths:
     put:
       summary: "Request to change product's state"
       parameters:
-      - in: header
-        type: string
-        name: 'Authorization'
-        description: "It's required to use access_token"
-        required: true
       - name: id
         in: path
         type: integer
