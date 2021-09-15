@@ -11,9 +11,20 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
+    
+securityDefinitions:
+  Authorization:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: "요청은 /AdminAuth/login에서 수신할 수 있는 access_token이 있는 Authorization 헤더를 전달해야 합니다."
+
+security: 
+ - Authorization: []
 
 schemes: [https]
 host: "admin.rsmmoney.com"
+basePath: "/RSMStage/API"
 # tags are used for organizing operations
 tags:
 - name: AdminAuth
@@ -25,7 +36,7 @@ consumes:
   - application/json
 
 paths:
-  /RSM/API/AdminAuth/login:
+  /AdminAuth/login:
     post:
       summary: "API 인증에 사용되는 액세스 토큰 요청"
       tags:
@@ -33,7 +44,8 @@ paths:
       description: "access_token은 60분 동안 유효합니다. 만료 후 새로운 access_token을 얻으려면 로그인 API를 다시 요청해야 합니다. 잘못된 로그인 시도 횟수는 5회로 제한됩니다. 총 5번의 잘못된 로그인 시도 후에 계정이 차단됩니다."
       parameters:
       - in: body
-        name: ''
+        name: 'body'
+        required: true
         schema:
           type: object
           properties:
@@ -71,20 +83,15 @@ paths:
         429:
           description: "요청이 너무 많습니다. 속도 제한 솔루션이 적용되었습니다."
           
-  /RSM/API/Product:
+  /Product:
     post:
       summary: "기본 상태 '초안'으로 새 제품 생성 요청 state = 'draft'"
       tags:
       - Product
       description: "이 시점에서 제품은 '초안' 상태이므로 사용자에게 보이지 않습니다."
       parameters:
-      - in: header
-        type: string
-        name: 'Authorization'
-        description: "access_token을 사용해야 합니다."
-        required: true
       - in: body
-        name: ''
+        name: 'body'
         schema:
           $ref: '#/definitions/FinancialProduct'
       responses:
@@ -108,12 +115,6 @@ paths:
       tags:
       - Product
       description: ""
-      parameters:
-        - in: header
-          type: string
-          name: 'Authorization'
-          description: "access_token을 사용해야 합니다."
-          required: true
       responses:
         200:
           description: '요청이 성공적으로 처리되었습니다.'
@@ -137,15 +138,10 @@ paths:
         401:
           description: "승인이 필요합니다."
           
-  /RSM/API/Product/{id}:
+  /Product/{id}:
     get:
       summary: "제품 세부정보 요청"
       parameters:
-      - in: header
-        type: string
-        name: 'Authorization'
-        description: "access_token을 사용해야 합니다."
-        required: true
       - in: path
         name: id
         type: integer
@@ -175,18 +171,14 @@ paths:
     put:
       summary: "제품 세부 정보 업데이트 요청"
       parameters:
-      - in: header
-        type: string
-        name: 'Authorization'
-        description: "access_token을 사용해야 합니다."
-        required: true
       - in: path
         name: id
         type: integer
         required: true
         description: "제품의 고유 ID"
       - in: body
-        name: ''
+        name: 'body'
+        required: true
         schema:
           $ref: '#/definitions/FinancialProduct'
       tags:
@@ -204,11 +196,6 @@ paths:
     delete:
       summary: "제품 삭제 요청"
       parameters:
-      - in: header
-        type: string
-        name: 'Authorization'
-        description: "access_token을 사용해야 합니다."
-        required: true
       - in: path
         name: id
         type: integer
@@ -230,15 +217,10 @@ paths:
           
           이 경우 기술적으로는 상품의 상태를 'subscribed' 로 변경하시기 바랍니다.  이 상태는 해당상품이 검색리스트에서는 보이지 않지만, 이미 계약한 사람을 위해 데이터베이스에서는 지속적으로 실적을 업데이트 함을 의미 합니다. "
           
-  /RSM/API/Product/state/{id}/{new_state}:
+  /Product/state/{id}/{new_state}:
     put:
       summary: "제품 상태 변경 요청"
       parameters:
-      - in: header
-        type: string
-        name: 'Authorization'
-        description: "access_token을 사용해야 합니다."
-        required: true
       - name: id
         in: path
         type: integer
